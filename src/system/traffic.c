@@ -14,6 +14,7 @@
 #include "traffic.h"
 #include "exec_utils.h"
 #include "sms.h"  /* 使用通用配置函数 */
+#include "airplane.h"  /* 飞行模式控制 */
 
 #define VNSTAT_DB "/var/lib/vnstat/vnstat.db"
 #define NETWORK_IFACE "sipa_eth0"
@@ -87,12 +88,8 @@ static void *flow_control_thread_func(void *arg) {
     while (1) {
         TrafficConfig config = read_traffic_config();
         if (config.switch_on == 0) {
-            /* 关闭流量控制时，恢复网络接口 */
-            char output[256];
-            run_command(output, sizeof(output), "ifconfig", NETWORK_IFACE, "up", NULL);
-             run_command(output, sizeof(output), "ifconfig", NETWORK_IFACE, "up", NULL);
-              run_command(output, sizeof(output), "ifconfig", NETWORK_IFACE, "up", NULL);
-               run_command(output, sizeof(output), "ifconfig", NETWORK_IFACE, "up", NULL);
+            /* 关闭流量控制时，关闭飞行模式恢复网络 */
+            set_airplane_mode(0);
             is_flow_control_running = 0;
             break;
         }
@@ -101,14 +98,10 @@ static void *flow_control_thread_func(void *arg) {
         get_traffic_from_vnstat(&rx, &tx);
         long long total = rx + tx;
 
-        char output[256];
         if (total >= config.much) {
-            run_command(output, sizeof(output), "ifconfig", NETWORK_IFACE, "down", NULL);
+            set_airplane_mode(1);  /* 流量超限，开启飞行模式 */
         } else {
-            run_command(output, sizeof(output), "ifconfig", NETWORK_IFACE, "up", NULL);
-             run_command(output, sizeof(output), "ifconfig", NETWORK_IFACE, "up", NULL);
-              run_command(output, sizeof(output), "ifconfig", NETWORK_IFACE, "up", NULL);
-               run_command(output, sizeof(output), "ifconfig", NETWORK_IFACE, "up", NULL);
+            set_airplane_mode(0);  /* 流量正常，关闭飞行模式 */
         }
         sleep(15);
     }
@@ -230,13 +223,9 @@ void handle_set_traffic_limit(struct mg_connection *c, struct mg_http_message *h
     config.much = atoll(much_str);
     save_traffic_config(&config);
 
-    char output[256];
     if (config.switch_on == 0) {
-        /* 关闭流量控制时，立即恢复网络（线程退出时也会恢复，双重保障） */
-        run_command(output, sizeof(output), "ifconfig", NETWORK_IFACE, "up", NULL);
-         run_command(output, sizeof(output), "ifconfig", NETWORK_IFACE, "up", NULL);
-          run_command(output, sizeof(output), "ifconfig", NETWORK_IFACE, "up", NULL);
-           run_command(output, sizeof(output), "ifconfig", NETWORK_IFACE, "up", NULL);
+        /* 关闭流量控制时，立即关闭飞行模式恢复网络 */
+        set_airplane_mode(0);
     } else if (!is_flow_control_running) {
         is_flow_control_running = 1;
         pthread_create(&flow_control_thread, NULL, flow_control_thread_func, NULL);

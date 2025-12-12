@@ -14,6 +14,15 @@ const lockingBands = ref(false)
 const lockingCell = ref(false)
 const refreshing = ref(false)
 
+// 自定义锁定相关状态
+const showCustomLock = ref(false)
+const customLocking = ref(false)
+const customLockForm = ref({
+  rat: 'LTE',
+  arfcn: '',
+  pci: ''
+})
+
 const servingCell = computed(() => cells.value.find(c => c.isServing))
 const neighborCells = computed(() => cells.value.filter(c => !c.isServing))
 const selectedBandsCount = computed(() => {
@@ -68,6 +77,28 @@ async function handleUnlockCell() {
   try { await apiUnlockCell(); success('小区解锁成功'); await fetchCells() }
   catch (err) { showError('解锁失败: ' + err.message) }
   finally { lockingCell.value = false }
+}
+
+// 自定义锁定小区
+async function handleCustomLockCell() {
+  const { rat, arfcn, pci } = customLockForm.value
+  if (!arfcn.trim() || !pci.trim()) {
+    showError('请输入频点和PCI')
+    return
+  }
+  if (!await confirm({ title: '自定义锁定', message: `确认锁定 ${rat} 频点=${arfcn} PCI=${pci}？` })) return
+  customLocking.value = true
+  try {
+    await apiLockCell(rat, arfcn.trim(), pci.trim())
+    success('小区锁定成功')
+    customLockForm.value = { rat: 'LTE', arfcn: '', pci: '' }
+    showCustomLock.value = false
+    await fetchCells()
+  } catch (err) {
+    showError('锁定失败: ' + err.message)
+  } finally {
+    customLocking.value = false
+  }
 }
 
 function getSignalColor(rsrp) {
@@ -281,6 +312,92 @@ onMounted(() => { fetchBands(); fetchCells() })
             </button>
           </div>
         </div>
+      </div>
+
+      <!-- 自定义锁定 -->
+      <div class="mt-4 border-t border-slate-200 dark:border-white/10 pt-4">
+        <button @click="showCustomLock = !showCustomLock"
+          class="w-full flex items-center justify-between p-3 bg-slate-50 dark:bg-white/5 rounded-xl hover:bg-slate-100 dark:hover:bg-white/10 transition-all duration-300">
+          <div class="flex items-center space-x-2">
+            <div class="w-6 h-6 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-md shadow-amber-500/30">
+              <i class="fas fa-sliders text-white text-[10px]"></i>
+            </div>
+            <span class="text-slate-700 dark:text-white/80 text-sm font-medium">自定义锁定</span>
+          </div>
+          <i class="fas fa-chevron-down text-slate-400 dark:text-white/40 text-xs transition-transform duration-300"
+            :class="{ 'rotate-180': showCustomLock }"></i>
+        </button>
+        
+        <transition
+          enter-active-class="transition-all duration-300 ease-out"
+          leave-active-class="transition-all duration-200 ease-in"
+          enter-from-class="opacity-0 max-h-0"
+          enter-to-class="opacity-100 max-h-48"
+          leave-from-class="opacity-100 max-h-48"
+          leave-to-class="opacity-0 max-h-0">
+          <div v-if="showCustomLock" class="overflow-hidden">
+            <div class="mt-3 p-3 bg-slate-50 dark:bg-white/5 rounded-xl">
+              <!-- 手机端：垂直布局 -->
+              <div class="sm:hidden space-y-3">
+                <div class="flex gap-2">
+                  <button type="button" @click="customLockForm.rat = 'LTE'"
+                    class="flex-1 py-2.5 text-xs font-semibold rounded-lg transition-all duration-200"
+                    :class="customLockForm.rat === 'LTE' 
+                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/30' 
+                      : 'bg-white dark:bg-white/10 text-slate-500 dark:text-white/50 border border-slate-200 dark:border-white/10'">
+                    4G LTE
+                  </button>
+                  <button type="button" @click="customLockForm.rat = 'NR'"
+                    class="flex-1 py-2.5 text-xs font-semibold rounded-lg transition-all duration-200"
+                    :class="customLockForm.rat === 'NR' 
+                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/30' 
+                      : 'bg-white dark:bg-white/10 text-slate-500 dark:text-white/50 border border-slate-200 dark:border-white/10'">
+                    5G NR
+                  </button>
+                </div>
+                <div class="flex gap-2">
+                  <input v-model="customLockForm.arfcn" type="text" placeholder="频点 ARFCN"
+                    class="flex-1 px-3 py-2.5 bg-white dark:bg-white/10 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white text-sm placeholder-slate-400 dark:placeholder-white/40 focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all">
+                  <input v-model="customLockForm.pci" type="text" placeholder="PCI"
+                    class="w-24 px-3 py-2.5 bg-white dark:bg-white/10 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white text-sm placeholder-slate-400 dark:placeholder-white/40 focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all">
+                </div>
+                <button @click="handleCustomLockCell" :disabled="customLocking"
+                  class="w-full py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-semibold rounded-lg hover:shadow-lg hover:shadow-amber-500/30 active:scale-[0.98] transition-all duration-200 disabled:opacity-50">
+                  <i :class="customLocking ? 'fas fa-spinner fa-spin' : 'fas fa-lock'" class="mr-1.5"></i>
+                  {{ customLocking ? '锁定中' : '锁定小区' }}
+                </button>
+              </div>
+              <!-- 电脑端：横向布局 -->
+              <div class="hidden sm:flex items-center gap-2">
+                <div class="flex gap-1">
+                  <button type="button" @click="customLockForm.rat = 'LTE'"
+                    class="px-3 py-2.5 text-xs font-semibold rounded-lg transition-all duration-200"
+                    :class="customLockForm.rat === 'LTE' 
+                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/30' 
+                      : 'bg-white dark:bg-white/10 text-slate-500 dark:text-white/50 border border-slate-200 dark:border-white/10'">
+                    4G
+                  </button>
+                  <button type="button" @click="customLockForm.rat = 'NR'"
+                    class="px-3 py-2.5 text-xs font-semibold rounded-lg transition-all duration-200"
+                    :class="customLockForm.rat === 'NR' 
+                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/30' 
+                      : 'bg-white dark:bg-white/10 text-slate-500 dark:text-white/50 border border-slate-200 dark:border-white/10'">
+                    5G
+                  </button>
+                </div>
+                <input v-model="customLockForm.arfcn" type="text" placeholder="频点 ARFCN"
+                  class="flex-1 px-3 py-2.5 bg-white dark:bg-white/10 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white text-sm placeholder-slate-400 dark:placeholder-white/40 focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all">
+                <input v-model="customLockForm.pci" type="text" placeholder="PCI"
+                  class="w-28 px-3 py-2.5 bg-white dark:bg-white/10 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white text-sm placeholder-slate-400 dark:placeholder-white/40 focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all">
+                <button @click="handleCustomLockCell" :disabled="customLocking"
+                  class="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-semibold rounded-lg hover:shadow-lg hover:shadow-amber-500/30 active:scale-[0.98] transition-all duration-200 disabled:opacity-50 whitespace-nowrap">
+                  <i :class="customLocking ? 'fas fa-spinner fa-spin' : 'fas fa-lock'" class="mr-1.5"></i>
+                  {{ customLocking ? '锁定中' : '锁定' }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </transition>
       </div>
 
       <!-- 空状态 -->
