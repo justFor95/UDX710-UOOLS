@@ -54,9 +54,13 @@ Lightweight, efficient, and perfect for resource-constrained embedded devices!
 |:---:|:---:|:---:|
 | <img src="docs/screenshot8.png" width="250" /> | <img src="docs/screenshot9.png" width="250" /> | <img src="docs/screenshot10.png" width="250" /> |
 
-| USB Mode | APN Settings | Plugin Store |
-|:---:|:---:|:---:|
-| <img src="docs/screenshot11.png" width="250" /> | <img src="docs/screenshot12.png" width="250" /> | <img src="docs/screenshot13.png" width="250" /> |
+| USB Mode | System Settings |
+|:---:|:---:|
+| <img src="docs/screenshot11.png" width="250" /> | <img src="docs/screenshot12.png" width="250" /> |
+
+| APN Settings | Plugin Store |
+|:---:|:---:|
+| <img src="docs/screenshot13.png" width="250" /> | <img src="docs/screenshot14.png" width="250" /> |
 
 ## Features
 

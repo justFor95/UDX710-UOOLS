@@ -52,9 +52,13 @@
 |:---:|:---:|:---:|
 | <img src="docs/screenshot8.png" width="250" /> | <img src="docs/screenshot9.png" width="250" /> | <img src="docs/screenshot10.png" width="250" /> |
 
-| USB模式 | APN设置 | 插件商城 |
-|:---:|:---:|:---:|
-| <img src="docs/screenshot11.png" width="250" /> | <img src="docs/screenshot12.png" width="250" /> | <img src="docs/screenshot13.png" width="250" /> |
+| USB模式 | 系统设置 |
+|:---:|:---:|
+| <img src="docs/screenshot11.png" width="250" /> | <img src="docs/screenshot12.png" width="250" /> |
+
+| APN设置 | 插件商城 |
+|:---:|:---:|
+| <img src="docs/screenshot13.png" width="250" /> | <img src="docs/screenshot14.png" width="250" /> |
 
 ## 功能特性
 
