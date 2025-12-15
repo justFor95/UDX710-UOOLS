@@ -21,8 +21,8 @@ This project provides two versions for different devices:
 
 | Version | Download |
 |:---:|:---:|
-| **UDX710 Generic** | [📥 Download](https://github.com/LeoChen-CoreMind/UDX710-UOOLS/releases/latest) |
-| **SZ50 Dedicated** | [📥 Download](https://github.com/LeoChen-CoreMind/UDX710-UOOLS/releases/latest) |
+| **UDX710 Generic** | [📥 Download](https://github.com/LeoChen-CoreMind/UDX710-TOOLS/releases/latest) |
+| **SZ50 Dedicated** | [📥 Download](https://github.com/LeoChen-CoreMind/UDX710-TOOLS/releases/latest) |
 
 ### SZ50 Dedicated Version Extra Features
 - 🔆 **LED Control** - Customize LED indicator status
@@ -54,11 +54,11 @@ Lightweight, efficient, and perfect for resource-constrained embedded devices!
 |:---:|:---:|:---:|
 | <img src="docs/screenshot8.png" width="250" /> | <img src="docs/screenshot9.png" width="250" /> | <img src="docs/screenshot10.png" width="250" /> |
 
-| USB Mode | System Settings |
-|:---:|:---:|
-| <img src="docs/screenshot11.png" width="250" /> | <img src="docs/screenshot12.png" width="250" /> |
+| USB Mode | APN Settings | Plugin Store |
+|:---:|:---:|:---:|
+| <img src="docs/screenshot11.png" width="250" /> | <img src="docs/screenshot12.png" width="250" /> | <img src="docs/screenshot13.png" width="250" /> |
 
-## Featu
+## Features
 
 ### Network Management
 - **Modem Control**: View IMEI, ICCID, carrier info, signal strength
@@ -81,6 +81,15 @@ Lightweight, efficient, and perfect for resource-constrained embedded devices!
 - **USB Mode Switch**: Switch between CDC-ECM, CDC-NCM, RNDIS USB network modes
   - Temporary mode: Effective after reboot, reverts on next reboot
   - Permanent mode: Persists across all reboots
+- **APN Settings**: Custom APN access point configuration
+  - Preset carrier configurations (China Mobile/Unicom/Telecom)
+  - Custom APN, username, password
+  - Multiple authentication protocols (PAP/CHAP)
+- **Plugin Store**: Extensible plugin system
+  - Support custom JS+HTML plugins
+  - Built-in Shell script execution API
+  - Script management (upload/edit/delete)
+  - Plugin import/export functionality
 - **OTA Update**: Over-the-air firmware updates
 - **Factory Reset**: Restore device to default settings
 - **Web Terminal**: Remote shell access
@@ -113,6 +122,7 @@ Lightweight, efficient, and perfect for resource-constrained embedded devices!
 │       ├── charge.c        # Battery management
 │       ├── airplane.c      # Airplane mode
 │       ├── usb_mode.c      # USB mode switch
+│       ├── plugin.c        # Plugin system
 │       ├── update.c        # OTA updates
 │       ├── factory_reset.c # Factory reset
 │       └── ...
@@ -177,6 +187,10 @@ The backend uses cross-compilation targeting aarch64-linux-gnu. Ensure your tool
 | `/api/led/status` | GET/POST | LED control |
 | `/api/airplane` | GET/POST | Airplane mode |
 | `/api/usb/mode` | GET/POST | USB mode switch (CDC-ECM/CDC-NCM/RNDIS) |
+| `/api/apn` | GET/POST | APN configuration management |
+| `/api/plugins` | GET/POST/DELETE | Plugin management |
+| `/api/scripts` | GET/POST/PUT/DELETE | Script management |
+| `/api/shell` | POST | Execute Shell commands |
 | `/api/update/check` | GET | Check for updates |
 | `/api/update/install` | POST | Install update |
 | `/api/factory-reset` | POST | Factory reset |
@@ -234,6 +248,7 @@ Special thanks to the following contributors:
 | **等不住** | AT Commands |
 | **黑衣剑士** | USB Mode Switch |
 | **Voodoo** | Glib Build Environment |
+| **1orz** | [project-cpe](https://github.com/1orz/project-cpe) Open Source Project |
 | **LeoChen** | Project Author |
 
 Thanks to all community members for your support and feedback!

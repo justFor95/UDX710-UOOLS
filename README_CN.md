@@ -52,9 +52,9 @@
 |:---:|:---:|:---:|
 | <img src="docs/screenshot8.png" width="250" /> | <img src="docs/screenshot9.png" width="250" /> | <img src="docs/screenshot10.png" width="250" /> |
 
-| USB模式 | 系统设置 |
-|:---:|:---:|
-| <img src="docs/screenshot11.png" width="250" /> | <img src="docs/screenshot12.png" width="250" /> |
+| USB模式 | APN设置 | 插件商城 |
+|:---:|:---:|:---:|
+| <img src="docs/screenshot11.png" width="250" /> | <img src="docs/screenshot12.png" width="250" /> | <img src="docs/screenshot13.png" width="250" /> |
 
 ## 功能特性
 
@@ -79,6 +79,15 @@
 - **USB模式切换**：在CDC-ECM、CDC-NCM、RNDIS三种USB网络模式间切换
   - 临时模式：重启后生效，再次重启恢复默认
   - 永久模式：永久保存，所有重启后都生效
+- **APN设置**：自定义APN接入点配置
+  - 预设运营商配置（中国移动/联通/电信）
+  - 自定义APN、用户名、密码
+  - 支持多种认证协议（PAP/CHAP）
+- **插件商城**：可扩展的插件系统
+  - 支持自定义JS+HTML插件
+  - 内置Shell脚本执行API
+  - 脚本管理（上传/编辑/删除）
+  - 插件导入/导出功能
 - **OTA更新**：空中固件升级
 - **恢复出厂**：恢复设备默认设置
 - **Web终端**：远程Shell访问
@@ -111,6 +120,7 @@
 │       ├── charge.c        # 电池管理
 │       ├── airplane.c      # 飞行模式
 │       ├── usb_mode.c      # USB模式切换
+│       ├── plugin.c        # 插件系统
 │       ├── update.c        # OTA更新
 │       ├── factory_reset.c # 恢复出厂
 │       └── ...
@@ -175,6 +185,10 @@ make
 | `/api/led/status` | GET/POST | LED控制 |
 | `/api/airplane` | GET/POST | 飞行模式 |
 | `/api/usb/mode` | GET/POST | USB模式切换 (CDC-ECM/CDC-NCM/RNDIS) |
+| `/api/apn` | GET/POST | APN配置管理 |
+| `/api/plugins` | GET/POST/DELETE | 插件管理 |
+| `/api/scripts` | GET/POST/PUT/DELETE | 脚本管理 |
+| `/api/shell` | POST | 执行Shell命令 |
 | `/api/update/check` | GET | 检查更新 |
 | `/api/update/install` | POST | 安装更新 |
 | `/api/factory-reset` | POST | 恢复出厂设置 |
@@ -232,6 +246,7 @@ make
 | **等不住** | 提供各种AT指令 |
 | **黑衣剑士** | 提供USB模式切换 |
 | **Voodoo** | Glib编译环境 |
+| **1orz** | [project-cpe](https://github.com/1orz/project-cpe) 开源项目 |
 | **LeoChen** | 项目作者 |
 
 感谢各位网友的支持与反馈！
